@@ -1,0 +1,10 @@
+*.bak
+*.uvguix.*
+build/
+DebugConfig/
+stm32/dl/
+stm32/STM32F4xx_DSP_StdPeriph_Lib*
+libstm32f4.a
+*.o
+stm32/*.bin
+stm32/*.elf

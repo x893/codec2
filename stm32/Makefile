@@ -35,7 +35,7 @@ endif
 
 PERIPHLIBURL    = http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware
 PERIPHLIBZIP    = stm32f4_dsp_stdperiph_lib.zip
-PERIPHLIBVER	= V1.7.1
+PERIPHLIBVER	= V1.8.0
 PERIPHLIBNAME	= STM32F4xx_DSP_StdPeriph_Lib
 PERIPHLIBDIR	= $(PERIPHLIBNAME)
 CMSIS		= $(PERIPHLIBDIR)/Libraries/CMSIS

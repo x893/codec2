@@ -163,6 +163,7 @@ struct CODEC2 * codec2_create(int mode)
 
     c2->softdec = NULL;
 
+#ifndef CORTEX_M4
     /* newamp1 initialisation */
 
     if (c2->mode == CODEC2_MODE_700C) {
@@ -176,7 +177,7 @@ struct CODEC2 * codec2_create(int mode)
         c2->phase_fft_fwd_cfg = codec2_fft_alloc(NEWAMP1_PHASE_NFFT, 0, NULL, NULL);
         c2->phase_fft_inv_cfg = codec2_fft_alloc(NEWAMP1_PHASE_NFFT, 1, NULL, NULL);
     }
-
+#endif
     return c2;
 }
 
@@ -1975,10 +1976,11 @@ float codec2_get_energy(struct CODEC2 *c2, const unsigned char *bits)
         e_index = unpack_natural_or_gray(bits, &nbit, 3, c2->gray);
         e = decode_energy(e_index, 3);
     }
+#ifndef CORTEX_M4
     if (c2->mode == CODEC2_MODE_700C) {
         e = codec2_energy_700c(c2, bits);
     }
-    
+#endif    
     return e;
 }
 
