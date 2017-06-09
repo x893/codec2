@@ -28,8 +28,8 @@
 #define LPC_MAX_N 512		/* maximum no. of samples in frame */
 #define PI 3.141592654		/* mathematical constant */
 
-#define ALPHA 1.0
-#define BETA  0.94
+#define ALPHA 1.0f
+#define BETA  0.94f
 
 #include <assert.h>
 #include <math.h>
@@ -49,17 +49,17 @@
 \*---------------------------------------------------------------------------*/
 
 void pre_emp(
-  float  Sn_pre[], /* output frame of speech samples                     */
-  float  Sn[],	   /* input frame of speech samples                      */
-  float *mem,      /* Sn[-1]single sample memory                         */
-  int   Nsam	   /* number of speech samples to use                    */
+	float  Sn_pre[],	/* output frame of speech samples	*/
+	float  Sn[],		/* input frame of speech samples	*/
+	float *mem,			/* Sn[-1]single sample memory		*/
+	int   Nsam			/* number of speech samples to use	*/
 )
 {
-    int   i;
+	int   i;
 
-    for(i=0; i<Nsam; i++) {
-	Sn_pre[i] = Sn[i] - ALPHA * mem[0];
-	mem[0] = Sn[i];
+	for (i = 0; i < Nsam; i++) {
+		Sn_pre[i] = Sn[i] - ALPHA * mem[0];
+		mem[0] = Sn[i];
     }
 
 }
@@ -82,9 +82,9 @@ void de_emp(
 {
     int   i;
 
-    for(i=0; i<Nsam; i++) {
-	Sn_de[i] = Sn[i] + BETA * mem[0];
-	mem[0] = Sn_de[i];
+	for (i = 0; i < Nsam; i++) {
+		Sn_de[i] = Sn[i] + BETA * mem[0];
+		mem[0] = Sn_de[i];
     }
 
 }
@@ -106,8 +106,8 @@ void hanning_window(
 {
   int i;	/* loop variable */
 
-  for(i=0; i<Nsam; i++)
-    Wn[i] = Sn[i]*(0.5 - 0.5*cosf(2*PI*(float)i/(Nsam-1)));
+	for (i = 0; i < Nsam; i++)
+		Wn[i] = Sn[i] * (0.5f - 0.5f * cosf(2 * PI * (float)i / (Nsam-1)));
 }
 
 /*---------------------------------------------------------------------------*\
@@ -167,7 +167,7 @@ void levinson_durbin(
     for(j=1; j<=i-1; j++)
       sum += a[i-1][j]*R[i-j];
     k = -1.0*(R[i] + sum)/e;		/* Equation 38b, Makhoul */
-    if (fabsf(k) > 1.0)
+    if (fabsf(k) > 1.0f)
       k = 0.0;
 
     a[i][i] = k;
@@ -266,21 +266,21 @@ void find_aks(
   float *E	/* residual energy */
 )
 {
-  float Wn[LPC_MAX_N];	/* windowed frame of Nsam speech samples */
-  float R[order+1];	/* order+1 autocorrelation values of Sn[] */
-  int i;
+	float Wn[LPC_MAX_N];	/* windowed frame of Nsam speech samples */
+	float R[order+1];	/* order+1 autocorrelation values of Sn[] */
+	int i;
 
-  assert(Nsam < LPC_MAX_N);
+	assert(Nsam < LPC_MAX_N);
 
-  hanning_window(Sn,Wn,Nsam);
-  autocorrelate(Wn,R,Nsam,order);
-  levinson_durbin(R,a,order);
+	hanning_window(Sn,Wn,Nsam);
+	autocorrelate(Wn,R,Nsam,order);
+	levinson_durbin(R,a,order);
 
-  *E = 0.0;
-  for(i=0; i<=order; i++)
-    *E += a[i]*R[i];
-  if (*E < 0.0)
-    *E = 1E-12;
+	*E = 0.0;
+	for (i = 0; i <= order; i++)
+		*E += a[i]*R[i];
+	if (*E < 0.0f)
+		*E = 1E-12;
 }
 
 /*---------------------------------------------------------------------------*\

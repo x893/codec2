@@ -145,10 +145,10 @@ void codec2_fft_inplace(codec2_fft_cfg cfg, codec2_fft_cpx* inout)
         kiss_fft(cfg, (kiss_fft_cpx*)inout, (kiss_fft_cpx*)inout);
     }
 #else
-    arm_cfft_f32(cfg->instance,(float*)inout,cfg->inverse,1);
+    arm_cfft_f32(cfg->instance, (float *)inout, cfg->inverse, 1);
     if (cfg->inverse)
     {
-        arm_scale_f32(inout,cfg->instance->fftLen,inout,cfg->instance->fftLen*2);
+        arm_scale_f32((float *)inout, cfg->instance->fftLen, (float *)inout, cfg->instance->fftLen * 2);
     }
 
 #endif

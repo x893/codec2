@@ -36,28 +36,28 @@
 
 /* General defines */
 
-#define N_SAMP          80		/* number of samples per frame          */
-#define MAX_AMP    80		/* maximum number of harmonics          */
+#define N_SAMP		80		/* number of samples per frame          */
+#define MAX_AMP		80		/* maximum number of harmonics          */
 #ifndef PI
-#define PI         3.141592654	/* mathematical constant                */
+	#define PI		3.141592654f	/* mathematical constant		*/
 #endif
-#define TWO_PI     6.283185307	/* mathematical constant                */
-#define FS         8000		/* sample rate in Hz                    */
-#define MAX_STR    256          /* maximum string size                  */
+#define TWO_PI		6.283185307f	/* mathematical constant		*/
+#define FS			8000			/* sample rate in Hz			*/
+#define MAX_STR		256				/* maximum string size			*/
 
-#define NW         279          /* analysis window size                 */
-#define FFT_ENC    512		/* size of FFT used for encoder         */
-#define FFT_DEC    512	    	/* size of FFT used in decoder          */
-#define TW         40		/* Trapezoidal synthesis window overlap */
-#define V_THRESH   6.0          /* voicing threshold in dB              */
-#define LPC_ORD    10		/* LPC order                            */
-#define LPC_ORD_LOW 6		/* LPC order for lower rates            */
+#define NW			279		/* analysis window size                 */
+#define FFT_ENC		512		/* size of FFT used for encoder         */
+#define FFT_DEC		512		/* size of FFT used in decoder          */
+#define TW			40		/* Trapezoidal synthesis window overlap */
+#define V_THRESH	6.0f	/* voicing threshold in dB              */
+#define LPC_ORD		10		/* LPC order                            */
+#define LPC_ORD_LOW	6		/* LPC order for lower rates            */
 
 /* Pitch estimation defines */
 
-#define M_PITCH        320		/* pitch analysis frame size            */
-#define P_MIN    20		/* minimum pitch                        */
-#define P_MAX    160		/* maximum pitch                        */
+#define M_PITCH		320		/* pitch analysis frame size            */
+#define P_MIN		20		/* minimum pitch                        */
+#define P_MAX		160		/* maximum pitch                        */
 
 /*---------------------------------------------------------------------------*\
 

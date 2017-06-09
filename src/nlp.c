@@ -43,16 +43,18 @@
 \*---------------------------------------------------------------------------*/
 
 #define PMAX_M      600		/* maximum NLP analysis window size     */
-#define COEFF       0.95	/* notch filter parameter               */
+#define COEFF       0.95f	/* notch filter parameter               */
 #define PE_FFT_SIZE 512		/* DFT size for pitch estimation        */
 #define DEC         5		/* decimation factor                    */
 #define SAMPLE_RATE 8000
-#define PI          3.141592654	/* mathematical constant                */
-#define T           0.1         /* threshold for local minima candidate */
-#define F0_MAX      500
-#define CNLP        0.3	        /* post processor constant              */
-#define NLP_NTAP 48	        /* Decimation LPF order */
-#undef  POST_PROCESS_MBE        /* choose post processor                */
+#ifndef PI
+	#define PI		3.141592654f	/* mathematical constant	*/
+#endif
+#define T			0.1f	/* threshold for local minima candidate */
+#define F0_MAX		500
+#define CNLP		0.3f	/* post processor constant              */
+#define NLP_NTAP	48		/* Decimation LPF order */
+#undef  POST_PROCESS_MBE	/* choose post processor                */
 
 //#undef DUMP
 
@@ -141,7 +143,7 @@ float post_process_sub_multiples(COMP Fw[],
 \*---------------------------------------------------------------------------*/
 
 void *nlp_create(
-int    m			/* analysis window size */
+	int    m			/* analysis window size */
 )
 {
     NLP *nlp;
@@ -154,16 +156,16 @@ int    m			/* analysis window size */
 	return NULL;
 
     nlp->m = m;
-    for(i=0; i<m/DEC; i++) {
-	nlp->w[i] = 0.5 - 0.5*cosf(2*PI*i/(m/DEC-1));
-    }
+	for (i = 0; i < m/DEC; i++) {
+		nlp->w[i] = 0.5f - 0.5f * cosf(2 * PI * i / (m / DEC - 1));
+	}
 
-    for(i=0; i<PMAX_M; i++)
-	nlp->sq[i] = 0.0;
+    for (i = 0; i < PMAX_M; i++)
+		nlp->sq[i] = 0.0;
     nlp->mem_x = 0.0;
     nlp->mem_y = 0.0;
-    for(i=0; i<NLP_NTAP; i++)
-	nlp->mem_fir[i] = 0.0;
+    for (i = 0; i < NLP_NTAP; i++)
+		nlp->mem_fir[i] = 0.0;
 
     nlp->fft_cfg = codec2_fft_alloc (PE_FFT_SIZE, 0, NULL, NULL);
     assert(nlp->fft_cfg != NULL);
@@ -251,44 +253,44 @@ float nlp(
     for(i=m-n; i<m; i++) 	    /* square latest speech samples */
 	nlp->sq[i] = Sn[i]*Sn[i];
 
-    for(i=m-n; i<m; i++) {	/* notch filter at DC */
-	notch = nlp->sq[i] - nlp->mem_x;
-	notch += COEFF*nlp->mem_y;
-	nlp->mem_x = nlp->sq[i];
-	nlp->mem_y = notch;
-	nlp->sq[i] = notch + 1.0;  /* With 0 input vectors to codec,
-				      kiss_fft() would take a long
-				      time to execute when running in
-				      real time.  Problem was traced
-				      to kiss_fft function call in
-				      this function. Adding this small
-				      constant fixed problem.  Not
-				      exactly sure why. */
-    }
+    for (i = m-n; i < m; i++) {	/* notch filter at DC */
+		notch = nlp->sq[i] - nlp->mem_x;
+		notch += COEFF * nlp->mem_y;
+		nlp->mem_x = nlp->sq[i];
+		nlp->mem_y = notch;
+		nlp->sq[i] = notch + 1.0f;  /* With 0 input vectors to codec,
+						kiss_fft() would take a long
+						time to execute when running in
+						real time.  Problem was traced
+						to kiss_fft function call in
+						this function. Adding this small
+						constant fixed problem.  Not
+						exactly sure why. */
+	}
 
     PROFILE_SAMPLE_AND_LOG(tnotch, start, "      square and notch");
 
-    for(i=m-n; i<m; i++) {	/* FIR filter vector */
+    for (i = m-n; i < m; i++) {	/* FIR filter vector */
 
-	for(j=0; j<NLP_NTAP-1; j++)
-	    nlp->mem_fir[j] = nlp->mem_fir[j+1];
-	nlp->mem_fir[NLP_NTAP-1] = nlp->sq[i];
+		for (j = 0; j < NLP_NTAP-1; j++)
+			nlp->mem_fir[j] = nlp->mem_fir[j+1];
+		nlp->mem_fir[NLP_NTAP-1] = nlp->sq[i];
 
-	nlp->sq[i] = 0.0;
-	for(j=0; j<NLP_NTAP; j++)
-	    nlp->sq[i] += nlp->mem_fir[j]*nlp_fir[j];
+		nlp->sq[i] = 0.0;
+		for (j = 0; j < NLP_NTAP; j++)
+			nlp->sq[i] += nlp->mem_fir[j]*nlp_fir[j];
     }
 
     PROFILE_SAMPLE_AND_LOG(filter, tnotch, "      filter");
 
     /* Decimate and DFT */
 
-    for(i=0; i<PE_FFT_SIZE; i++) {
-	Fw[i].real = 0.0;
-	Fw[i].imag = 0.0;
+    for (i = 0; i < PE_FFT_SIZE; i++) {
+		Fw[i].real = 0.0;
+		Fw[i].imag = 0.0;
     }
-    for(i=0; i<m/DEC; i++) {
-	Fw[i].real = nlp->sq[i*DEC]*nlp->w[i];
+    for (i = 0; i < m/DEC; i++) {
+		Fw[i].real = nlp->sq[i * DEC] * nlp->w[i];
     }
     PROFILE_SAMPLE_AND_LOG(window, filter, "      window");
     #ifdef DUMP
@@ -301,7 +303,7 @@ float nlp(
     PROFILE_SAMPLE_AND_LOG(fft, window, "      fft");
 
     for(i=0; i<PE_FFT_SIZE; i++)
-	Fw[i].real = Fw[i].real*Fw[i].real + Fw[i].imag*Fw[i].imag;
+		Fw[i].real = Fw[i].real*Fw[i].real + Fw[i].imag*Fw[i].imag;
 
     PROFILE_SAMPLE_AND_LOG(magsq, fft, "      mag sq");
     #ifdef DUMP
@@ -313,11 +315,11 @@ float nlp(
 
     gmax = 0.0;
     gmax_bin = PE_FFT_SIZE*DEC/pmax;
-    for(i=PE_FFT_SIZE*DEC/pmax; i<=PE_FFT_SIZE*DEC/pmin; i++) {
-	if (Fw[i].real > gmax) {
-	    gmax = Fw[i].real;
-	    gmax_bin = i;
-	}
+    for (i = PE_FFT_SIZE * DEC / pmax; i <= PE_FFT_SIZE * DEC / pmin; i++) {
+		if (Fw[i].real > gmax) {
+			gmax = Fw[i].real;
+			gmax_bin = i;
+		}
     }
 
     PROFILE_SAMPLE_AND_LOG(peakpick, magsq, "      peak pick");
@@ -383,41 +385,41 @@ float post_process_sub_multiples(COMP Fw[],
     mult = 2;
     min_bin = PE_FFT_SIZE*DEC/pmax;
     cmax_bin = gmax_bin;
-    prev_f0_bin = *prev_Wo*(4000.0/PI)*(PE_FFT_SIZE*DEC)/SAMPLE_RATE;
+    prev_f0_bin = *prev_Wo * (4000.0f / PI) * (PE_FFT_SIZE * DEC) / SAMPLE_RATE;
 
     while(gmax_bin/mult >= min_bin) {
 
-	b = gmax_bin/mult;			/* determine search interval */
-	bmin = 0.8*b;
-	bmax = 1.2*b;
-	if (bmin < min_bin)
-	    bmin = min_bin;
+		b = gmax_bin/mult;			/* determine search interval */
+		bmin = 0.8 * b;
+		bmax = 1.2 * b;
+		if (bmin < min_bin)
+			bmin = min_bin;
 
-	/* lower threshold to favour previous frames pitch estimate,
-	    this is a form of pitch tracking */
+		/* lower threshold to favour previous frames pitch estimate,
+			this is a form of pitch tracking */
 
-	if ((prev_f0_bin > bmin) && (prev_f0_bin < bmax))
-	    thresh = CNLP*0.5*gmax;
-	else
-	    thresh = CNLP*gmax;
+		if ((prev_f0_bin > bmin) && (prev_f0_bin < bmax))
+			thresh = CNLP * 0.5f * gmax;
+		else
+			thresh = CNLP * gmax;
 
-	lmax = 0;
-	lmax_bin = bmin;
-	for (b=bmin; b<=bmax; b++) 	     /* look for maximum in interval */
-	    if (Fw[b].real > lmax) {
-		lmax = Fw[b].real;
-		lmax_bin = b;
-	    }
+		lmax = 0;
+		lmax_bin = bmin;
+		for (b=bmin; b<=bmax; b++) 	     /* look for maximum in interval */
+			if (Fw[b].real > lmax) {
+				lmax = Fw[b].real;
+				lmax_bin = b;
+			}
 
-	if (lmax > thresh)
-	    if ((lmax > Fw[lmax_bin-1].real) && (lmax > Fw[lmax_bin+1].real)) {
-		cmax_bin = lmax_bin;
-	    }
+		if (lmax > thresh)
+			if ((lmax > Fw[lmax_bin-1].real) && (lmax > Fw[lmax_bin+1].real)) {
+				cmax_bin = lmax_bin;
+			}
 
-	mult++;
+		mult++;
     }
 
-    best_f0 = (float)cmax_bin*SAMPLE_RATE/(PE_FFT_SIZE*DEC);
+    best_f0 = (float)cmax_bin * SAMPLE_RATE / (PE_FFT_SIZE * DEC);
 
     return best_f0;
 }

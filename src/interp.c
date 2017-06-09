@@ -70,25 +70,25 @@ void interpolate(
 
     /* Wo depends on voicing of this and adjacent frames */
 
-    if (interp->voiced) {
-	if (prev->voiced && next->voiced)
-	    interp->Wo = (prev->Wo + next->Wo)/2.0;
-	if (!prev->voiced && next->voiced)
-	    interp->Wo = next->Wo;
-	if (prev->voiced && !next->voiced)
-	    interp->Wo = prev->Wo;
-    }
-    else {
-	interp->Wo = TWO_PI/P_MAX;
-    }
-    interp->L = PI/interp->Wo;
+	if (interp->voiced) {
+		if (prev->voiced && next->voiced)
+			interp->Wo = (prev->Wo + next->Wo) / 2.0f;
+		if (!prev->voiced && next->voiced)
+			interp->Wo = next->Wo;
+		if (prev->voiced && !next->voiced)
+			interp->Wo = prev->Wo;
+	}
+	else {
+		interp->Wo = TWO_PI/P_MAX;
+	}
+	interp->L = PI/interp->Wo;
 
     /* Interpolate amplitudes using linear interpolation in log domain */
 
-    for(l=1; l<=interp->L; l++) {
-	w = l*interp->Wo;
-	log_amp = (sample_log_amp(prev, w) + sample_log_amp(next, w))/2.0;
-	interp->A[l] = powf(10.0, log_amp);
+	for (l = 1; l <= interp->L; l++) {
+		w = l * interp->Wo;
+		log_amp = (sample_log_amp(prev, w) + sample_log_amp(next, w)) / 2.0f;
+		interp->A[l] = powf(10.0f, log_amp);
     }
 }
 
@@ -109,21 +109,22 @@ float sample_log_amp(MODEL *model, float w)
     int   m;
     float f, log_amp;
 
-    assert(w > 0.0); assert (w <= PI);
+	assert(w > 0.0f);
+	assert (w <= PI);
 
-    m = floorf(w/model->Wo + 0.5);
-    f = (w - m*model->Wo)/w;
-    assert(f <= 1.0);
+    m = floorf(w/model->Wo + 0.5f);
+    f = (w - m * model->Wo) / w;
+    assert(f <= 1.0f);
 
-    if (m < 1) {
-	log_amp = f*log10f(model->A[1] + 1E-6);
+    if (m < 1.0f) {
+		log_amp = f * log10f(model->A[1] + 1E-6f);
     }
-    else if ((m+1) > model->L) {
-	log_amp = (1.0-f)*log10f(model->A[model->L] + 1E-6);
+    else if ((m + 1.0f) > model->L) {
+		log_amp = (1.0f - f) * log10f(model->A[model->L] + 1E-6f);
     }
     else {
-	log_amp = (1.0-f)*log10f(model->A[m] + 1E-6) +
-                  f*log10f(model->A[m+1] + 1E-6);
+		log_amp = (1.0f - f) * log10f(model->A[m] + 1E-6f) +
+                  f * log10f(model->A[m + 1] + 1E-6f);
     }
 
     return log_amp;
@@ -256,7 +257,7 @@ void interp_Wo2(
 
     if (interp->voiced) {
 	if (prev->voiced && next->voiced)
-	    interp->Wo = (1.0 - weight)*prev->Wo + weight*next->Wo;
+	    interp->Wo = (1.0f - weight) * prev->Wo + weight * next->Wo;
 	if (!prev->voiced && next->voiced)
 	    interp->Wo = next->Wo;
 	if (prev->voiced && !next->voiced)
@@ -300,7 +301,7 @@ float interp_energy(float prev_e, float next_e)
 
 float interp_energy2(float prev_e, float next_e, float weight)
 {
-    return powf(10.0, (1.0 - weight)*log10f(prev_e) + weight*log10f(next_e));
+    return powf(10.0f, (1.0f - weight) * log10f(prev_e) + weight * log10f(next_e));
 
 }
 
@@ -319,7 +320,7 @@ void interpolate_lsp_ver2(float interp[], float prev[],  float next[], float wei
 {
     int i;
 
-    for(i=0; i<order; i++)
-	interp[i] = (1.0 - weight)*prev[i] + weight*next[i];
+    for (i = 0; i < order; i++)
+		interp[i] = (1.0f - weight)*prev[i] + weight*next[i];
 }
 

@@ -186,65 +186,65 @@ int lpc_to_lsp (float *a, int order, float *freq, int nb, float delta)
     xl = 1.0;               	/* start at point xl = 1 		*/
 
 
-    for(j=0;j<order;j++){
-	if(j%2)            	/* determines whether P' or Q' is eval. */
-	    pt = qx;
-	else
-	    pt = px;
+    for (j = 0; j < order; j++) {
+		if (j % 2)            	/* determines whether P' or Q' is eval. */
+			pt = qx;
+		else
+			pt = px;
 
-	psuml = cheb_poly_eva(pt,xl,order);	/* evals poly. at xl 	*/
-	flag = 1;
-	while(flag && (xr >= -1.0)){
-	    xr = xl - delta ;                  	/* interval spacing 	*/
-	    psumr = cheb_poly_eva(pt,xr,order);/* poly(xl-delta_x) 	*/
-	    temp_psumr = psumr;
-	    temp_xr = xr;
+		psuml = cheb_poly_eva(pt,xl,order);	/* evals poly. at xl 	*/
+		flag = 1;
+		while (flag && (xr >= -1.0)) {
+			xr = xl - delta ;                  	/* interval spacing 	*/
+			psumr = cheb_poly_eva(pt,xr,order);/* poly(xl-delta_x) 	*/
+			temp_psumr = psumr;
+			temp_xr = xr;
 
-        /* if no sign change increment xr and re-evaluate
-           poly(xr). Repeat til sign change.  if a sign change has
-           occurred the interval is bisected and then checked again
-           for a sign change which determines in which interval the
-           zero lies in.  If there is no sign change between poly(xm)
-           and poly(xl) set interval between xm and xr else set
-           interval between xl and xr and repeat till root is located
-           within the specified limits  */
+			/* if no sign change increment xr and re-evaluate
+			   poly(xr). Repeat til sign change.  if a sign change has
+			   occurred the interval is bisected and then checked again
+			   for a sign change which determines in which interval the
+			   zero lies in.  If there is no sign change between poly(xm)
+			   and poly(xl) set interval between xm and xr else set
+			   interval between xl and xr and repeat till root is located
+			   within the specified limits  */
 
-	    if(((psumr*psuml)<0.0) || (psumr == 0.0)){
-		roots++;
+			if (((psumr * psuml) < 0.0f) || (psumr == 0.0f)) {
+				roots++;
 
-		psumm=psuml;
-		for(k=0;k<=nb;k++){
-		    xm = (xl+xr)/2;        	/* bisect the interval 	*/
-		    psumm=cheb_poly_eva(pt,xm,order);
-		    if(psumm*psuml>0.){
-			psuml=psumm;
-			xl=xm;
-		    }
-		    else{
-			psumr=psumm;
-			xr=xm;
-		    }
+				psumm = psuml;
+				for (k = 0; k <= nb; k++) {
+					xm = (xl+xr)/2;        	/* bisect the interval 	*/
+					psumm = cheb_poly_eva(pt, xm, order);
+					if (psumm * psuml > 0.0f) {
+						psuml = psumm;
+						xl = xm;
+					}
+					else {
+						psumr = psumm;
+						xr = xm;
+					}
+				}
+
+				/* once zero is found, reset initial interval to xr 	*/
+				freq[j] = (xm);
+				xl = xm;
+				flag = 0;       		/* reset flag for next search 	*/
+			}
+			else {
+				psuml = temp_psumr;
+				xl = temp_xr;
+			}
 		}
+    }
 
-	       /* once zero is found, reset initial interval to xr 	*/
-	       freq[j] = (xm);
-	       xl = xm;
-	       flag = 0;       		/* reset flag for next search 	*/
-	    }
-	    else{
-		psuml=temp_psumr;
-		xl=temp_xr;
-	    }
+	/* convert from x domain to radians */
+
+	for (i = 0; i < order; i++) {
+		freq[i] = acosf(freq[i]);
 	}
-    }
 
-    /* convert from x domain to radians */
-
-    for(i=0; i<order; i++) {
-	freq[i] = acosf(freq[i]);
-    }
-
-    return(roots);
+	return(roots);
 }
 
 /*---------------------------------------------------------------------------*\
@@ -299,8 +299,8 @@ void lsp_to_lpc(float *lsp, float *ak, int order)
 	    n2 = n1 + 1;
 	    n3 = n2 + 1;
 	    n4 = n3 + 1;
-	    xout1 = xin1 - 2*(freq[2*i]) * *n1 + *n2;
-	    xout2 = xin2 - 2*(freq[2*i+1]) * *n3 + *n4;
+	    xout1 = xin1 - 2 * (freq[2 * i]) * *n1 + *n2;
+	    xout2 = xin2 - 2 * (freq[2 * i + 1]) * *n3 + *n4;
 	    *n2 = *n1;
 	    *n4 = *n3;
 	    *n1 = xin1;
@@ -308,11 +308,11 @@ void lsp_to_lpc(float *lsp, float *ak, int order)
 	    xin1 = xout1;
 	    xin2 = xout2;
 	}
-	xout1 = xin1 + *(n4+1);
-	xout2 = xin2 - *(n4+2);
-	ak[j] = (xout1 + xout2)*0.5;
-	*(n4+1) = xin1;
-	*(n4+2) = xin2;
+	xout1 = xin1 + *(n4 + 1);
+	xout2 = xin2 - *(n4 + 2);
+	ak[j] = (xout1 + xout2) * 0.5f;
+	*(n4 + 1) = xin1;
+	*(n4 + 2) = xin2;
 
 	xin1 = 0.0;
 	xin2 = 0.0;

@@ -87,27 +87,27 @@ void make_analysis_window(codec2_fft_cfg fft_fwd_cfg, float w[], COMP W[])
   m = 0.0;
   for(i=0; i<M_PITCH/2-NW/2; i++)
     w[i] = 0.0;
-  for(i=M_PITCH/2-NW/2,j=0; i<M_PITCH/2+NW/2; i++,j++) {
-    w[i] = 0.5 - 0.5*cosf(TWO_PI*j/(NW-1));
-    m += w[i]*w[i];
-  }
-  for(i=M_PITCH/2+NW/2; i<M_PITCH; i++)
-    w[i] = 0.0;
+	for (i = M_PITCH / 2 - NW / 2, j = 0; i < M_PITCH / 2 + NW / 2; i++,j++) {
+		w[i] = 0.5f - 0.5f * cosf(TWO_PI * j / (NW - 1));
+		m += w[i] * w[i];
+	}
+	for (i = M_PITCH / 2 + NW / 2; i < M_PITCH; i++)
+		w[i] = 0.0;
 
-  /* Normalise - makes freq domain amplitude estimation straight
-     forward */
+	/* Normalise - makes freq domain amplitude estimation straight
+		forward */
 
-  m = 1.0/sqrtf(m*FFT_ENC);
-  for(i=0; i<M_PITCH; i++) {
-    w[i] *= m;
-  }
+	m = 1.0f / sqrtf(m * FFT_ENC);
+	for (i = 0; i < M_PITCH; i++) {
+		w[i] *= m;
+	}
 
-  /*
-     Generate DFT of analysis window, used for later processing.  Note
-     we modulo FFT_ENC shift the time domain window w[], this makes the
-     imaginary part of the DFT W[] equal to zero as the shifted w[] is
-     even about the n=0 time axis if NW is odd.  Having the imag part
-     of the DFT W[] makes computation easier.
+	/*
+		Generate DFT of analysis window, used for later processing.  Note
+		we modulo FFT_ENC shift the time domain window w[], this makes the
+		imaginary part of the DFT W[] equal to zero as the shifted w[] is
+		even about the n=0 time axis if NW is odd.  Having the imag part
+		of the DFT W[] makes computation easier.
 
      0                      FFT_ENC-1
      |-------------------------|
@@ -123,20 +123,20 @@ void make_analysis_window(codec2_fft_cfg fft_fwd_cfg, float w[], COMP W[])
        NW/2              NW/2
   */
 
-  for(i=0; i<FFT_ENC; i++) {
-    wshift[i].real = 0.0;
-    wshift[i].imag = 0.0;
-  }
-  for(i=0; i<NW/2; i++)
-    wshift[i].real = w[i+M_PITCH/2];
-  for(i=FFT_ENC-NW/2,j=M_PITCH/2-NW/2; i<FFT_ENC; i++,j++)
-   wshift[i].real = w[j];
+	for (i = 0; i < FFT_ENC; i++) {
+		wshift[i].real = 0.0;
+		wshift[i].imag = 0.0;
+	}
+	for (i = 0; i < NW/2; i++)
+		wshift[i].real = w[i+M_PITCH/2];
+	for (i = FFT_ENC - NW / 2, j = M_PITCH / 2 - NW / 2; i < FFT_ENC; i++, j++)
+		wshift[i].real = w[j];
 
-  codec2_fft(fft_fwd_cfg, wshift, W);
+	codec2_fft(fft_fwd_cfg, wshift, W);
 
-  /*
-      Re-arrange W[] to be symmetrical about FFT_ENC/2.  Makes later
-      analysis convenient.
+	/*
+		Re-arrange W[] to be symmetrical about FFT_ENC/2.  Makes later
+		analysis convenient.
 
    Before:
 
@@ -325,29 +325,29 @@ void hs_pitch_refinement(MODEL *model, COMP Sw[], float pmin, float pmax, float 
   model->L = PI/model->Wo;	/* use initial pitch est. for L */
   Wom = model->Wo;
   Em = 0.0;
-  r = TWO_PI/FFT_ENC;
-  one_on_r = 1.0/r;
+	r = TWO_PI / FFT_ENC;
+	one_on_r = 1.0f / r;
 
   /* Determine harmonic sum for a range of Wo values */
 
-  for(p=pmin; p<=pmax; p+=pstep) {
-    E = 0.0;
-    Wo = TWO_PI/p;
+	for (p = pmin; p <= pmax; p += pstep) {
+		E = 0.0;
+		Wo = TWO_PI/p;
 
-    /* Sum harmonic magnitudes */
-    for(m=1; m<=model->L; m++) {
-        b = (int)(m*Wo*one_on_r + 0.5);
-        E += Sw[b].real*Sw[b].real + Sw[b].imag*Sw[b].imag;
-    }
-    /* Compare to see if this is a maximum */
+		/* Sum harmonic magnitudes */
+		for (m = 1; m <= model->L; m++) {
+			b = (int)(m * Wo * one_on_r + 0.5f);
+			E += Sw[b].real * Sw[b].real + Sw[b].imag * Sw[b].imag;
+		}
+		/* Compare to see if this is a maximum */
 
-    if (E > Em) {
-      Em = E;
-      Wom = Wo;
-    }
-  }
+		if (E > Em) {
+			Em = E;
+			Wom = Wo;
+		}
+	}
 
-  model->Wo = Wom;
+	model->Wo = Wom;
 }
 
 /*---------------------------------------------------------------------------*\
@@ -370,20 +370,20 @@ void estimate_amplitudes(MODEL *model, COMP Sw[], COMP W[], int est_phase)
   int   offset;
   COMP  Am;
 
-  r = TWO_PI/FFT_ENC;
-  one_on_r = 1.0/r;
+	r = TWO_PI/FFT_ENC;
+	one_on_r = 1.0f / r;
 
   for(m=1; m<=model->L; m++) {
     den = 0.0;
     am = (int)((m - 0.5)*model->Wo*one_on_r + 0.5);
     bm = (int)((m + 0.5)*model->Wo*one_on_r + 0.5);
-    b = (int)(m*model->Wo/r + 0.5);
+	b = (int)(m * model->Wo / r + 0.5f);
 
     /* Estimate ampltude of harmonic */
 
     den = 0.0;
     Am.real = Am.imag = 0.0;
-    offset = FFT_ENC/2 - (int)(m*model->Wo*one_on_r + 0.5);
+	offset = FFT_ENC / 2 - (int)(m * model->Wo * one_on_r + 0.5f);
     for(i=am; i<bm; i++) {
       den += Sw[i].real*Sw[i].real + Sw[i].imag*Sw[i].imag;
       Am.real += Sw[i].real*W[i + offset].real;
@@ -433,50 +433,50 @@ float est_voicing_mbe(
     Ew.imag = 0;
 
     sig = 1E-4;
-    for(l=1; l<=model->L/4; l++) {
-	sig += model->A[l]*model->A[l];
+	for(l=1; l<=model->L/4; l++) {
+		sig += model->A[l] * model->A[l];
     }
 
-    Wo = model->Wo;
-    error = 1E-4;
+	Wo = model->Wo;
+	error = 1E-4;
 
     /* Just test across the harmonics in the first 1000 Hz (L/4) */
 
-    for(l=1; l<=model->L/4; l++) {
-	Am.real = 0.0;
-	Am.imag = 0.0;
-	den = 0.0;
-	al = ceilf((l - 0.5)*Wo*FFT_ENC/TWO_PI);
-	bl = ceilf((l + 0.5)*Wo*FFT_ENC/TWO_PI);
+	for (l = 1; l <= model->L/4; l++) {
+		Am.real = 0.0;
+		Am.imag = 0.0;
+		den = 0.0;
+		al = ceilf((l - 0.5)*Wo*FFT_ENC/TWO_PI);
+		bl = ceilf((l + 0.5)*Wo*FFT_ENC/TWO_PI);
 
-	/* Estimate amplitude of harmonic assuming harmonic is totally voiced */
+		/* Estimate amplitude of harmonic assuming harmonic is totally voiced */
 
-        offset = FFT_ENC/2 - l*Wo*FFT_ENC/TWO_PI + 0.5;
-	for(m=al; m<bl; m++) {
-	    Am.real += Sw[m].real*W[offset+m].real;
-	    Am.imag += Sw[m].imag*W[offset+m].real;
-	    den += W[offset+m].real*W[offset+m].real;
-        }
+		offset = FFT_ENC / 2 - l * Wo * FFT_ENC/TWO_PI + 0.5f;
+		for (m = al; m < bl; m++) {
+			Am.real += Sw[m].real*W[offset+m].real;
+			Am.imag += Sw[m].imag*W[offset+m].real;
+			den += W[offset+m].real*W[offset+m].real;
+		}
 
-        Am.real = Am.real/den;
-        Am.imag = Am.imag/den;
+		Am.real = Am.real/den;
+		Am.imag = Am.imag/den;
 
-        /* Determine error between estimated harmonic and original */
+		/* Determine error between estimated harmonic and original */
 
-        offset = FFT_ENC/2 - l*Wo*FFT_ENC/TWO_PI + 0.5;
-        for(m=al; m<bl; m++) {
-	    Ew.real = Sw[m].real - Am.real*W[offset+m].real;
-	    Ew.imag = Sw[m].imag - Am.imag*W[offset+m].real;
-	    error += Ew.real*Ew.real;
-	    error += Ew.imag*Ew.imag;
+		offset = FFT_ENC/2 - l*Wo*FFT_ENC/TWO_PI + 0.5f;
+		for (m = al; m < bl; m++) {
+			Ew.real = Sw[m].real - Am.real * W[offset + m].real;
+			Ew.imag = Sw[m].imag - Am.imag * W[offset + m].real;
+			error += Ew.real * Ew.real;
+			error += Ew.imag * Ew.imag;
+		}
 	}
-    }
 
-    snr = 10.0*log10f(sig/error);
-    if (snr > V_THRESH)
-	model->voiced = 1;
-    else
-	model->voiced = 0;
+	snr = 10.0f * log10f(sig / error);
+	if (snr > V_THRESH)
+		model->voiced = 1;
+	else
+		model->voiced = 0;
 
     /* post processing, helps clean up some voicing errors ------------------*/
 
@@ -488,27 +488,27 @@ float est_voicing_mbe(
     */
 
     elow = ehigh = 1E-4;
-    for(l=1; l<=model->L/2; l++) {
-	elow += model->A[l]*model->A[l];
-    }
-    for(l=model->L/2; l<=model->L; l++) {
-	ehigh += model->A[l]*model->A[l];
-    }
-    eratio = 10.0*log10f(elow/ehigh);
+	for (l = 1; l <= model->L / 2; l++) {
+		elow += model->A[l] * model->A[l];
+	}
+	for (l = model->L / 2; l <= model->L; l++) {
+		ehigh += model->A[l] * model->A[l];
+	}
+    eratio = 10.0f * log10f(elow/ehigh);
 
     /* Look for Type 1 errors, strongly V speech that has been
        accidentally declared UV */
 
     if (model->voiced == 0)
-	if (eratio > 10.0)
-	    model->voiced = 1;
+		if (eratio > 10.0f)
+			model->voiced = 1;
 
     /* Look for Type 2 errors, strongly UV speech that has been
        accidentally declared V */
 
     if (model->voiced == 1) {
-	if (eratio < -10.0)
-	    model->voiced = 0;
+		if (eratio < -10.0)
+			model->voiced = 0;
 
 	/* A common source of Type 2 errors is the pitch estimator
 	   gives a low (50Hz) estimate for UV speech, which gives a
@@ -516,10 +516,10 @@ float est_voicing_mbe(
 	   These errors are much more common than people with 50Hz3
 	   pitch, so we have just a small eratio threshold. */
 
-	sixty = 60.0*TWO_PI/FS;
-	if ((eratio < -4.0) && (model->Wo <= sixty))
-	    model->voiced = 0;
-    }
+		sixty = 60.0f * TWO_PI / FS;
+		if ((eratio < -4.0f) && (model->Wo <= sixty))
+			model->voiced = 0;
+	}
     //printf(" v: %d snr: %f eratio: %3.2f %f\n",model->voiced,snr,eratio,dF0);
 
     return snr;
@@ -614,7 +614,7 @@ void synthesise(
     for(l=1; l<=model->L; l++) {
         //for(l=model->L/2; l<=model->L; l++) {
         //for(l=1; l<=model->L/4; l++) {
-        b = (int)(l*model->Wo*FFT_DEC/TWO_PI + 0.5);
+        b = (int)(l * model->Wo * FFT_DEC / TWO_PI + 0.5f);
         if (b > ((FFT_DEC/2)-1)) {
             b = (FFT_DEC/2)-1;
         }

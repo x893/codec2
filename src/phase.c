@@ -59,10 +59,10 @@ void sample_phase(MODEL *model,
 
     /* Sample phase at harmonics */
 
-    for(m=1; m<=model->L; m++) {
-        b = (int)(m*model->Wo/r + 0.5);
-        H[m] = cconj(A[b]);      /* synth filter 1/A is opposite phase to analysis filter */
-    }
+	for (m = 1; m <= model->L; m++) {
+			b = (int)(m * model->Wo / r + 0.5f);
+			H[m] = cconj(A[b]);      /* synth filter 1/A is opposite phase to analysis filter */
+	}
 }
 
 
@@ -179,7 +179,7 @@ void phase_synth_zero_order(
     */
 
     ex_phase[0] += (model->Wo)*N_SAMP;
-    ex_phase[0] -= TWO_PI*floorf(ex_phase[0]/TWO_PI + 0.5);
+    ex_phase[0] -= TWO_PI * floorf(ex_phase[0] / TWO_PI + 0.5f);
 
     for(m=1; m<=model->L; m++) {
 
@@ -208,7 +208,7 @@ void phase_synth_zero_order(
 
         /* modify sinusoidal phase */
 
-        new_phi = atan2f(A_[m].imag, A_[m].real+1E-12);
+        new_phi = atan2f(A_[m].imag, A_[m].real + 1E-12f);
         model->phi[m] = new_phi;
     }
 
@@ -276,13 +276,10 @@ void mag_to_phase(float phase[],             /* Nfft/2+1 output phase samples in
 
     /*  The maths says we are meant to be using log(x), not 20*log10(x),
         so we need to scale the phase to account for this:
-        log(x) = 20*log10(x)/scale */
-                          
-    float scale = (20.0/logf(10.0));
-    
-    for(i=0; i<Ns; i++) {
-        phase[i] = Cf[i].imag/scale;
-    }
+        log(x) = 20 * log10(x) / scale */
 
-    
+	float scale = (20.0f / logf(10.0f));
+	for (i = 0; i < Ns; i++) {
+		phase[i] = Cf[i].imag / scale;
+	}
 }

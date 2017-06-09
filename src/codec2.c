@@ -129,8 +129,8 @@ struct CODEC2 * codec2_create(int mode)
 
     for(l=1; l<=MAX_AMP; l++)
 	c2->prev_model_dec.A[l] = 0.0;
-    c2->prev_model_dec.Wo = TWO_PI/P_MAX;
-    c2->prev_model_dec.L = PI/c2->prev_model_dec.Wo;
+    c2->prev_model_dec.Wo = TWO_PI / P_MAX;
+    c2->prev_model_dec.L = (int)(PI / c2->prev_model_dec.Wo);
     c2->prev_model_dec.voiced = 0;
 
     for(i=0; i<LPC_ORD; i++) {
@@ -786,23 +786,23 @@ void codec2_decode_1600(struct CODEC2 *c2, short speech[], const unsigned char *
     /* LSPs are sampled every 40ms so we interpolate the 3 frames in
        between, then recover spectral amplitudes */
 
-    for(i=0, weight=0.25; i<3; i++, weight += 0.25) {
-	interpolate_lsp_ver2(&lsps[i][0], c2->prev_lsps_dec, &lsps[3][0], weight, LPC_ORD);
+	for (i = 0, weight = 0.25f; i < 3; i++, weight += 0.25f) {
+		interpolate_lsp_ver2(&lsps[i][0], c2->prev_lsps_dec, &lsps[3][0], weight, LPC_ORD);
     }
-    for(i=0; i<4; i++) {
-	lsp_to_lpc(&lsps[i][0], &ak[i][0], LPC_ORD);
-	aks_to_M2(c2->fftr_fwd_cfg, &ak[i][0], LPC_ORD, &model[i], e[i], &snr, 0, 0,
-                  c2->lpc_pf, c2->bass_boost, c2->beta, c2->gamma, Aw);
-	apply_lpc_correction(&model[i]);
-	synthesise_one_frame(c2, &speech[N_SAMP*i], &model[i], Aw);
+	for (i = 0; i < 4; i++) {
+		lsp_to_lpc(&lsps[i][0], &ak[i][0], LPC_ORD);
+		aks_to_M2(c2->fftr_fwd_cfg, &ak[i][0], LPC_ORD, &model[i], e[i], &snr, 0, 0,
+				c2->lpc_pf, c2->bass_boost, c2->beta, c2->gamma, Aw);
+		apply_lpc_correction(&model[i]);
+		synthesise_one_frame(c2, &speech[N_SAMP*i], &model[i], Aw);
     }
 
     /* update memories for next frame ----------------------------*/
 
     c2->prev_model_dec = model[3];
     c2->prev_e_dec = e[3];
-    for(i=0; i<LPC_ORD; i++)
-	c2->prev_lsps_dec[i] = lsps[3][i];
+    for (i = 0; i < LPC_ORD; i++)
+		c2->prev_lsps_dec[i] = lsps[3][i];
 
 }
 
@@ -956,23 +956,23 @@ void codec2_decode_1400(struct CODEC2 *c2, short speech[], const unsigned char *
     /* LSPs are sampled every 40ms so we interpolate the 3 frames in
        between, then recover spectral amplitudes */
 
-    for(i=0, weight=0.25; i<3; i++, weight += 0.25) {
-	interpolate_lsp_ver2(&lsps[i][0], c2->prev_lsps_dec, &lsps[3][0], weight, LPC_ORD);
+    for (i = 0, weight = 0.25f; i < 3; i++, weight += 0.25f) {
+		interpolate_lsp_ver2(&lsps[i][0], c2->prev_lsps_dec, &lsps[3][0], weight, LPC_ORD);
     }
-    for(i=0; i<4; i++) {
-	lsp_to_lpc(&lsps[i][0], &ak[i][0], LPC_ORD);
-	aks_to_M2(c2->fftr_fwd_cfg, &ak[i][0], LPC_ORD, &model[i], e[i], &snr, 0, 0,
-                  c2->lpc_pf, c2->bass_boost, c2->beta, c2->gamma, Aw);
-	apply_lpc_correction(&model[i]);
-	synthesise_one_frame(c2, &speech[N_SAMP*i], &model[i], Aw);
+    for (i = 0; i < 4; i++) {
+		lsp_to_lpc(&lsps[i][0], &ak[i][0], LPC_ORD);
+		aks_to_M2(c2->fftr_fwd_cfg, &ak[i][0], LPC_ORD, &model[i], e[i], &snr, 0, 0,
+					c2->lpc_pf, c2->bass_boost, c2->beta, c2->gamma, Aw);
+		apply_lpc_correction(&model[i]);
+		synthesise_one_frame(c2, &speech[N_SAMP*i], &model[i], Aw);
     }
 
     /* update memories for next frame ----------------------------*/
 
     c2->prev_model_dec = model[3];
     c2->prev_e_dec = e[3];
-    for(i=0; i<LPC_ORD; i++)
-	c2->prev_lsps_dec[i] = lsps[3][i];
+    for (i = 0; i < LPC_ORD; i++)
+		c2->prev_lsps_dec[i] = lsps[3][i];
 
 }
 
@@ -1121,7 +1121,7 @@ void codec2_decode_1300(struct CODEC2 *c2, short speech[], const unsigned char *
     check_lsp_order(&lsps[3][0], LPC_ORD);
     bw_expand_lsps(&lsps[3][0], LPC_ORD, 50.0, 100.0);
 
-    if (ber_est > 0.15) {
+    if (ber_est > 0.15f) {
         model[0].voiced =  model[1].voiced = model[2].voiced = model[3].voiced = 0;
         e[3] = decode_energy(10, E_BITS);
         bw_expand_lsps(&lsps[3][0], LPC_ORD, 200.0, 200.0);
@@ -1134,20 +1134,20 @@ void codec2_decode_1300(struct CODEC2 *c2, short speech[], const unsigned char *
        the 3 frames in between */
 
     PROFILE_SAMPLE(recover_start);
-    for(i=0, weight=0.25; i<3; i++, weight += 0.25) {
-	interpolate_lsp_ver2(&lsps[i][0], c2->prev_lsps_dec, &lsps[3][0], weight, LPC_ORD);
-        interp_Wo2(&model[i], &c2->prev_model_dec, &model[3], weight);
-        e[i] = interp_energy2(c2->prev_e_dec, e[3],weight);
+    for (i = 0, weight = 0.25f; i < 3; i++, weight += 0.25f) {
+		interpolate_lsp_ver2(&lsps[i][0], c2->prev_lsps_dec, &lsps[3][0], weight, LPC_ORD);
+		interp_Wo2(&model[i], &c2->prev_model_dec, &model[3], weight);
+		e[i] = interp_energy2(c2->prev_e_dec, e[3],weight);
     }
 
     /* then recover spectral amplitudes */
 
-    for(i=0; i<4; i++) {
-	lsp_to_lpc(&lsps[i][0], &ak[i][0], LPC_ORD);
-	aks_to_M2(c2->fftr_fwd_cfg, &ak[i][0], LPC_ORD, &model[i], e[i], &snr, 0, 0,
-                  c2->lpc_pf, c2->bass_boost, c2->beta, c2->gamma, Aw);
-	apply_lpc_correction(&model[i]);
-	synthesise_one_frame(c2, &speech[N_SAMP*i], &model[i], Aw);
+    for (i = 0; i < 4; i++) {
+		lsp_to_lpc(&lsps[i][0], &ak[i][0], LPC_ORD);
+		aks_to_M2(c2->fftr_fwd_cfg, &ak[i][0], LPC_ORD, &model[i], e[i], &snr, 0, 0,
+					c2->lpc_pf, c2->bass_boost, c2->beta, c2->gamma, Aw);
+		apply_lpc_correction(&model[i]);
+		synthesise_one_frame(c2, &speech[N_SAMP*i], &model[i], Aw);
     }
     /*
     for(i=0; i<4; i++) {
@@ -1326,23 +1326,23 @@ void codec2_decode_1200(struct CODEC2 *c2, short speech[], const unsigned char *
     /* LSPs are sampled every 40ms so we interpolate the 3 frames in
        between, then recover spectral amplitudes */
 
-    for(i=0, weight=0.25; i<3; i++, weight += 0.25) {
-	interpolate_lsp_ver2(&lsps[i][0], c2->prev_lsps_dec, &lsps[3][0], weight, LPC_ORD);
+	for (i = 0, weight = 0.25f; i < 3; i++, weight += 0.25f) {
+		interpolate_lsp_ver2(&lsps[i][0], c2->prev_lsps_dec, &lsps[3][0], weight, LPC_ORD);
     }
-    for(i=0; i<4; i++) {
-	lsp_to_lpc(&lsps[i][0], &ak[i][0], LPC_ORD);
-	aks_to_M2(c2->fftr_fwd_cfg, &ak[i][0], LPC_ORD, &model[i], e[i], &snr, 0, 0,
-                  c2->lpc_pf, c2->bass_boost, c2->beta, c2->gamma, Aw);
-	apply_lpc_correction(&model[i]);
-	synthesise_one_frame(c2, &speech[N_SAMP*i], &model[i], Aw);
+    for (i = 0; i < 4; i++) {
+		lsp_to_lpc(&lsps[i][0], &ak[i][0], LPC_ORD);
+		aks_to_M2(c2->fftr_fwd_cfg, &ak[i][0], LPC_ORD, &model[i], e[i], &snr, 0, 0,
+					c2->lpc_pf, c2->bass_boost, c2->beta, c2->gamma, Aw);
+		apply_lpc_correction(&model[i]);
+		synthesise_one_frame(c2, &speech[N_SAMP*i], &model[i], Aw);
     }
 
     /* update memories for next frame ----------------------------*/
 
     c2->prev_model_dec = model[3];
     c2->prev_e_dec = e[3];
-    for(i=0; i<LPC_ORD; i++)
-	c2->prev_lsps_dec[i] = lsps[3][i];
+    for (i = 0; i < LPC_ORD; i++)
+		c2->prev_lsps_dec[i] = lsps[3][i];
 }
 
 
@@ -1931,7 +1931,7 @@ float codec2_get_energy(struct CODEC2 *c2, const unsigned char *bits)
 	   (c2->mode == CODEC2_MODE_700C)
 	   );
     MODEL model;
-    float xq_dec[2] = {};
+    float xq_dec[2];
     int e_index, WoE_index;
     float e;
     unsigned int nbit;
@@ -2030,9 +2030,9 @@ void synthesise_one_frame(struct CODEC2 *c2, short speech[], MODEL *model, COMP 
     ear_protection(c2->Sn_, N_SAMP);
 
     for(i=0; i<N_SAMP; i++) {
-	if (c2->Sn_[i] > 32767.0)
+	if (c2->Sn_[i] > 32767.0f)
 	    speech[i] = 32767;
-	else if (c2->Sn_[i] < -32767.0)
+	else if (c2->Sn_[i] < -32767.0f)
 	    speech[i] = -32767;
 	else
 	    speech[i] = c2->Sn_[i];
@@ -2074,8 +2074,8 @@ void analyse_one_frame(struct CODEC2 *c2, MODEL *model, short speech[])
     nlp(c2->nlp,c2->Sn,N_SAMP,P_MIN,P_MAX,&pitch,Sw, c2->W, &c2->prev_Wo_enc);
     PROFILE_SAMPLE_AND_LOG(model_start, nlp_start, "    nlp");
 
-    model->Wo = TWO_PI/pitch;
-    model->L = PI/model->Wo;
+    model->Wo = TWO_PI / pitch;
+    model->L = PI / model->Wo;
 
     /* estimate model parameters */
 
@@ -2116,14 +2116,14 @@ static void ear_protection(float in_out[], int n) {
 
     /* determine how far above set point */
 
-    over = max_sample/30000.0;
+    over = max_sample / 30000.0f;
 
     /* If we are x dB over set point we reduce level by 2x dB, this
        attenuates major excursions in amplitude (likely to be caused
        by bit errors) more than smaller ones */
 
-    if (over > 1.0) {
-        gain = 1.0/(over*over);
+    if (over > 1.0f) {
+        gain = 1.0f / (over * over);
         //fprintf(stderr, "gain: %f\n", gain);
         for(i=0; i<n; i++)
             in_out[i] *= gain;
@@ -2132,8 +2132,8 @@ static void ear_protection(float in_out[], int n) {
 
 void codec2_set_lpc_post_filter(struct CODEC2 *c2, int enable, int bass_boost, float beta, float gamma)
 {
-    assert((beta >= 0.0) && (beta <= 1.0));
-    assert((gamma >= 0.0) && (gamma <= 1.0));
+    assert((beta >= 0.0f) && (beta <= 1.0f));
+    assert((gamma >= 0.0f) && (gamma <= 1.0f));
     c2->lpc_pf = enable;
     c2->bass_boost = bass_boost;
     c2->beta = beta;
@@ -2153,19 +2153,14 @@ int codec2_get_spare_bit_index(struct CODEC2 *c2)
     switch(c2->mode) {
     case CODEC2_MODE_1300:
         return 2; // bit 2 (3th bit) is v2 (third voicing bit)
-        break;
     case CODEC2_MODE_1400:
         return 10; // bit 10 (11th bit) is v2 (third voicing bit)
-        break;
     case CODEC2_MODE_1600:
         return 15; // bit 15 (16th bit) is v2 (third voicing bit)
-        break;
     case CODEC2_MODE_700:
         return 26; // bits 26 and 27 are spare
-        break;
     case CODEC2_MODE_700B:
         return 27; // bit 27 is spare
-        break;
     }
 
     return -1;
@@ -2178,7 +2173,7 @@ int codec2_get_spare_bit_index(struct CODEC2 *c2)
 
 int codec2_rebuild_spare_bit(struct CODEC2 *c2, int unpacked_bits[])
 {
-    int v1,v3;
+    int v1, v3;
 
     assert(c2 != NULL);
 
@@ -2186,39 +2181,25 @@ int codec2_rebuild_spare_bit(struct CODEC2 *c2, int unpacked_bits[])
 
     switch(c2->mode) {
     case CODEC2_MODE_1300:
-
-        v3 = unpacked_bits[1+1+1];
+        v3 = unpacked_bits[1 + 1 + 1];
 
         /* if either adjacent frame is voiced, make this one voiced */
-
         unpacked_bits[2] = (v1 || v3);
-
         return 0;
 
-        break;
-
     case CODEC2_MODE_1400:
-
         v3 = unpacked_bits[1+1+8+1];
 
         /* if either adjacent frame is voiced, make this one voiced */
-
         unpacked_bits[10] = (v1 || v3);
-
         return 0;
-
-        break;
 
     case CODEC2_MODE_1600:
         v3 = unpacked_bits[1+1+8+5+1];
 
         /* if either adjacent frame is voiced, make this one voiced */
-
         unpacked_bits[15] = (v1 || v3);
-
         return 0;
-
-        break;
     }
 
     return -1;

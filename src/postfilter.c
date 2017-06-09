@@ -44,13 +44,13 @@
 
 \*---------------------------------------------------------------------------*/
 
-#define BG_THRESH 40.0     /* only consider low levels signals for bg_est */
-#define BG_BETA    0.1     /* averaging filter constant                   */
-#define BG_MARGIN  6.0     /* harmonics this far above BG noise are
-			      randomised.  Helped make bg noise less
-			      spikey (impulsive) for mmt1, but speech was
-                              perhaps a little rougher.
-			   */
+#define BG_THRESH	40.0f	/* only consider low levels signals for bg_est */
+#define BG_BETA		0.1f	/* averaging filter constant                   */
+#define BG_MARGIN	6.0f	/* harmonics this far above BG noise are
+								randomised.  Helped make bg noise less
+								spikey (impulsive) for mmt1, but speech was
+								perhaps a little rougher.
+							*/
 
 /*---------------------------------------------------------------------------*\
 
@@ -108,35 +108,35 @@ void postfilter(
 
   /* determine average energy across spectrum */
 
-  e = 1E-12;
-  for(m=1; m<=model->L; m++)
-      e += model->A[m]*model->A[m];
+	e = 1E-12;
+	for (m = 1; m <= model->L; m++)
+		e += model->A[m]*model->A[m];
 
-  assert(e > 0.0);
-  e = 10.0*log10f(e/model->L);
+	assert(e > 0.0f);
+	e = 10.0f * log10f(e / model->L);
 
   /* If beneath threhold, update bg estimate.  The idea
      of the threshold is to prevent updating during high level
      speech. */
 
-  if ((e < BG_THRESH) && !model->voiced)
-      *bg_est =  *bg_est*(1.0 - BG_BETA) + e*BG_BETA;
+	if ((e < BG_THRESH) && !model->voiced)
+		*bg_est =  *bg_est * (1.0f - BG_BETA) + e * BG_BETA;
 
   /* now mess with phases during voiced frames to make any harmonics
      less then our background estimate unvoiced.
   */
 
-  uv = 0;
-  thresh = powf(10.0, (*bg_est + BG_MARGIN)/20.0);
-  if (model->voiced)
-      for(m=1; m<=model->L; m++)
-	  if (model->A[m] < thresh) {
-	      model->phi[m] = TWO_PI*(float)codec2_rand()/CODEC2_RAND_MAX;
-	      uv++;
-	  }
+	uv = 0;
+	thresh = powf(10.0f, (*bg_est + BG_MARGIN) / 20.0f);
+	if (model->voiced)
+		for (m = 1; m <= model->L; m++)
+			if (model->A[m] < thresh) {
+				model->phi[m] = TWO_PI*(float)codec2_rand()/CODEC2_RAND_MAX;
+				uv++;
+			}
 
 #ifdef DUMP
-  dump_bg(e, *bg_est, 100.0*uv/model->L);
+	dump_bg(e, *bg_est, 100.0*uv/model->L);
 #endif
 
 }
